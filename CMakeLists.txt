@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 2.8)
+project(prova C)
+
+#find_package(BLAS)
+find_package(LAPACK)
+#find_package(LibLZMA REQUIRED NO_MODULE)
+#find_package(TIFF)
+#find_package(LAPACK CONFIG REQUIRED)
+
+#message(STATUS "CLAPACK_FOUND: ${CLAPACK_FOUND}")
+#message(STATUS "CLAPACK_VERSION: ${CLAPACK_VERSION}")
+#message(STATUS "CLAPACK_LIBRARY: ${CLAPACK_LIBRARY}")
+message(STATUS "LAPACK_LIBRARY: ${LAPACK_LIBRARY}")
+#message(STATUS "CLAPACK_INCLUDE_DIR: ${CLAPACK_INCLUDE_DIR}")
+
+#message(STATUS "LibLZMA_FOUND: ${LibLZMA_FOUND}")
+#message(STATUS "LibLZMA_LIBRARIES: ${LibLZMA_LIBRARIES}")
