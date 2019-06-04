@@ -1,7 +1,6 @@
 #!/usr/bin/env pwsh
 
-#$vcpkg_fork="_liblzma"
-$vcpkg_fork="_opencv4_deps"
+$vcpkg_fork="_coin"
 
 function getProgramFiles32bit() {
   $out = ${env:PROGRAMFILES(X86)}

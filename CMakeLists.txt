@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
-project(prova C)
+project(prova C CXX)
 
 #find_package(BLAS)
+#find_package(OpenBLAS)
 find_package(LAPACK)
 #find_package(LibLZMA REQUIRED NO_MODULE)
 #find_package(TIFF)
@@ -10,8 +11,14 @@ find_package(LAPACK)
 #message(STATUS "CLAPACK_FOUND: ${CLAPACK_FOUND}")
 #message(STATUS "CLAPACK_VERSION: ${CLAPACK_VERSION}")
 #message(STATUS "CLAPACK_LIBRARY: ${CLAPACK_LIBRARY}")
-message(STATUS "LAPACK_LIBRARY: ${LAPACK_LIBRARY}")
+#message(STATUS "LAPACK_LIBRARY: ${LAPACK_LIBRARY}")
 #message(STATUS "CLAPACK_INCLUDE_DIR: ${CLAPACK_INCLUDE_DIR}")
 
 #message(STATUS "LibLZMA_FOUND: ${LibLZMA_FOUND}")
 #message(STATUS "LibLZMA_LIBRARIES: ${LibLZMA_LIBRARIES}")
+
+#add_executable(prova_blas call_blas.c)
+#target_link_libraries(prova OpenBLAS::OpenBLAS)
+
+add_executable(prova_lapack call_lapack.cpp)
+target_link_libraries(prova_lapack clapack::clapack)

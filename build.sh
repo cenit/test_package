@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 bypass_vcpkg=false
-vcpkg_fork="_liblzma"
+vcpkg_fork="_coin"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if [[ "$1" == "gcc" ]]; then
@@ -35,4 +35,5 @@ mkdir -p build_release
 cd build_release
 cmake .. -DCMAKE_BUILD_TYPE=Release ${vcpkg_define} ${vcpkg_triplet_define} ${additional_defines} ${additional_build_setup}
 cmake --build .
+#make VERBOSE=1
 cd ..
