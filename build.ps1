@@ -128,9 +128,13 @@ Write-Host "Setting up environment to use CMake generator: $generator" -Foregrou
 New-Item -Path .\build_win_release -ItemType directory -Force
 Set-Location build_win_release
 cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Release" $additional_build_setup ..
+cmake --build . --config Release
+#cmake --build . --config Release -- /verbosity:detailed
 Set-Location ..
 
-New-Item -Path .\build_win_debug -ItemType directory -Force
-Set-Location build_win_debug
-cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Debug" $additional_build_setup ..
-Set-Location ..
+#New-Item -Path .\build_win_debug -ItemType directory -Force
+#Set-Location build_win_debug
+#cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Debug" $additional_build_setup ..
+#cmake --build . --config Debug
+#cmake --build . --config Debug -- /verbosity:detailed
+#Set-Location ..
