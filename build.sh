@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 bypass_vcpkg=false
-vcpkg_fork="_coin"
+vcpkg_fork="_opencv4"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if [[ "$1" == "gcc" ]]; then

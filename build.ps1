@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 
-$vcpkg_fork="_coin"
+$vcpkg_fork="_opencv4"
 
 function getProgramFiles32bit() {
   $out = ${env:PROGRAMFILES(X86)}
