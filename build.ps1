@@ -1,6 +1,8 @@
 #!/usr/bin/env pwsh
 
-$vcpkg_fork="_opencv4"
+$number_of_build_workers=8
+$vcpkg_fork=""
+#$install_prefix="-DCMAKE_INSTALL_PREFIX=.."
 
 function getProgramFiles32bit() {
   $out = ${env:PROGRAMFILES(X86)}
@@ -75,16 +77,16 @@ function getLatestVisualStudioWithDesktopWorkloadVersion() {
 }
 
 
-if ((Test-Path "${env:VCPKG_ROOT}$vcpkg_fork")) {
+if (${env:VCPKG_ROOT} -and (Test-Path "${env:VCPKG_ROOT}$vcpkg_fork")) {
   $vcpkg_path = "$env:VCPKG_ROOT$vcpkg_fork"
   Write-Host "Found vcpkg in VCPKG_ROOT${vcpkg_fork}: $vcpkg_path"
 }
-elseif ((Test-Path "${env:WORKSPACE}\vcpkg$vcpkg_fork")) {
+elseif (${env:WORKSPACE} -and (Test-Path "${env:WORKSPACE}\vcpkg$vcpkg_fork")) {
   $vcpkg_path = "${env:WORKSPACE}\vcpkg$vcpkg_fork"
   Write-Host "Found vcpkg in WORKSPACE\vcpkg${vcpkg_fork}: $vcpkg_path"
 }
 else {
-  Throw "test requires vcpkg!"
+  Throw "Videoloop requires vcpkg!"
 }
 
 if ($null -eq $env:VCPKG_DEFAULT_TRIPLET) {
@@ -125,16 +127,33 @@ else {
 }
 Write-Host "Setting up environment to use CMake generator: $generator" -ForegroundColor Yellow
 
+if ($null -eq (Get-Command "nvcc.exe" -ErrorAction SilentlyContinue)) {
+  if (Test-Path env:CUDA_PATH) {
+    $env:PATH += ";${env:CUDA_PATH}\bin"
+    Write-Host "Found cuda in ${env:CUDA_PATH}" -ForegroundColor Yellow
+  }
+  else {
+    Write-Host "Unable to find CUDA, if necessary please install it or define a CUDA_PATH env variable pointing to the install folder" -ForegroundColor Yellow
+  }
+}
+
+if (Test-Path env:CUDA_PATH) {
+  if (-Not(Test-Path env:CUDA_TOOLKIT_ROOT_DIR)) {
+    $env:CUDA_TOOLKIT_ROOT_DIR = "${env:CUDA_PATH}"
+    Write-Host "Added missing env variable CUDA_TOOLKIT_ROOT_DIR" -ForegroundColor Yellow
+  }
+}
+
 New-Item -Path .\build_win_release -ItemType directory -Force
 Set-Location build_win_release
-cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Release" $additional_build_setup ..
-cmake --build . --config Release
+cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Release" $additional_build_setup ${install_prefix} ..
+cmake --build . --config Release --parallel ${number_of_build_workers}
 #cmake --build . --config Release -- /verbosity:detailed
 Set-Location ..
 
 #New-Item -Path .\build_win_debug -ItemType directory -Force
 #Set-Location build_win_debug
-#cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Debug" $additional_build_setup ..
-#cmake --build . --config Debug
-#cmake --build . --config Debug -- /verbosity:detailed
+#cmake -G "$generator" -T "host=x64" -A "x64" "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_path\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=$vcpkg_triplet" "-DCMAKE_BUILD_TYPE=Debug" $additional_build_setup ${install_prefix} ..
+#cmake --build . --config Debug --parallel ${number_of_build_workers}
+##cmake --build . --config Debug -- /verbosity:detailed
 #Set-Location ..
