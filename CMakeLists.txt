@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(prova C CXX)
 
+
+#find_package(CUDNN)
 #find_package(BLAS)
 #find_package(OpenBLAS)
 #find_package(LAPACK)
@@ -11,6 +13,8 @@ find_package(FFMPEG)
 
 #set(protobuf_MODULE_COMPATIBLE ON CACHE BOOL "Enable compatible protobuf symbols")
 #find_package(protobuf)
+
+#message(STATUS "ENV{CUDACXX}: $ENV{CUDACXX}")
 
 #message(STATUS "CLAPACK_FOUND: ${CLAPACK_FOUND}")
 #message(STATUS "CLAPACK_VERSION: ${CLAPACK_VERSION}")
@@ -31,6 +35,7 @@ message(STATUS "FFMPEG_libavformat_LIBRARY : FOUND: ${FFMPEG_libavformat_FOUND} 
 message(STATUS "FFMPEG_libavdevice_LIBRARY : FOUND: ${FFMPEG_libavdevice_FOUND} - ${FFMPEG_libavdevice_LIBRARY}")
 message(STATUS "FFMPEG_libavcodec_LIBRARY : FOUND: ${FFMPEG_libavcodec_FOUND} - ${FFMPEG_libavcodec_LIBRARY}")
 message(STATUS "FFMPEG_libswresample_LIBRARY : FOUND: ${FFMPEG_libswresample_FOUND} - ${FFMPEG_libswresample_LIBRARY}")
+message(STATUS "FFMPEG_libavresample_LIBRARY : FOUND: ${FFMPEG_libavresample_FOUND} - ${FFMPEG_libavresample_LIBRARY}")
 message(STATUS "FFMPEG_libavutil_LIBRARY : FOUND: ${FFMPEG_libavutil_FOUND} - ${FFMPEG_libavutil_LIBRARY}")
 message(STATUS "FFMPEG_libswscale_LIBRARY : FOUND: ${FFMPEG_libswscale_FOUND} - ${FFMPEG_libswscale_LIBRARY}")
 message(STATUS "FFMPEG_PLATFORM_DEPENDENT_LIBS : ${FFMPEG_PLATFORM_DEPENDENT_LIBS}")
@@ -45,8 +50,10 @@ message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
 #target_link_libraries(prova_lapack ${LAPACK_LIBRARIES})
 #target_link_libraries(prova_lapack clapack::clapack)
 
-#add_executable(prova_ffmpeg ffmpeg_test.cpp)
-#target_link_libraries(prova_ffmpeg ${FFMPEG_LIBRARIES})
+add_executable(prova_ffmpeg ffmpeg_test.cpp)
+target_link_libraries(prova_ffmpeg ${FFMPEG_LIBRARIES})
 
-add_executable(VideoLoop opencv.cpp)
-target_link_libraries(VideoLoop PRIVATE ${OpenCV_LIBS})
+#add_executable(test_ocv opencv_test.cpp)
+#target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
+
+
