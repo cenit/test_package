@@ -86,7 +86,7 @@ elseif (${env:WORKSPACE} -and (Test-Path "${env:WORKSPACE}\vcpkg$vcpkg_fork")) {
   Write-Host "Found vcpkg in WORKSPACE\vcpkg${vcpkg_fork}: $vcpkg_path"
 }
 else {
-  Throw "Videoloop requires vcpkg!"
+  Throw "test_package requires vcpkg!"
 }
 
 if ($null -eq $env:VCPKG_DEFAULT_TRIPLET) {
@@ -157,3 +157,4 @@ Set-Location ..
 #cmake --build . --config Debug --parallel ${number_of_build_workers}
 ##cmake --build . --config Debug -- /verbosity:detailed
 #Set-Location ..
+

@@ -29,7 +29,7 @@ then
   echo "Found vcpkg in WORKSPACE/vcpkg${vcpkg_fork}: ${vcpkg_path}"
 elif [ ! "$bypass_vcpkg" = true ]
 then
-  (>&2 echo "VideoLoop is unsupported without vcpkg, use at your own risk!")
+  (>&2 echo "test_package is unsupported without vcpkg, use at your own risk!")
 fi
 
 ## DEBUG
@@ -45,3 +45,4 @@ cd build_release
 cmake -DCMAKE_BUILD_TYPE=Release ${vcpkg_define} ${vcpkg_triplet_define} ${additional_defines} ${additional_build_setup} ${install_prefix} ..
 cmake --build . --parallel ${number_of_build_workers}
 cd ..
+
