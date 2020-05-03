@@ -45,4 +45,3 @@ cd build_release
 cmake -DCMAKE_BUILD_TYPE=Release ${vcpkg_define} ${vcpkg_triplet_define} ${additional_defines} ${additional_build_setup} ${install_prefix} ..
 cmake --build . --parallel ${number_of_build_workers}
 cd ..
-
