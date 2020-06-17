@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 
 $number_of_build_workers=8
-$vcpkg_fork=""
+$vcpkg_fork="_opencv43"
 #$install_prefix="-DCMAKE_INSTALL_PREFIX=.."
 
 function getProgramFiles32bit() {
@@ -157,4 +157,3 @@ Set-Location ..
 #cmake --build . --config Debug --parallel ${number_of_build_workers}
 ##cmake --build . --config Debug -- /verbosity:detailed
 #Set-Location ..
-

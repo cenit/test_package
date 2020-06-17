@@ -42,9 +42,12 @@ find_package(OpenEXR)
 #message(STATUS "FFMPEG_PLATFORM_DEPENDENT_LIBS : ${FFMPEG_PLATFORM_DEPENDENT_LIBS}")
 #message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
 
-message(STATUS "OpenEXR_VERSION : ${OpenEXR_VERSION}")
-message(STATUS "OpenEXR_LIBRARIES : ${OpenEXR_LIBRARIES}")
-message(STATUS "OpenEXR_INCLUDE_DIRS : ${OpenEXR_INCLUDE_DIRS}")
+message(STATUS "OPENEXR_VERSION : ${OPENEXR_VERSION}")
+message(STATUS "OPENEXR_LIBRARIES : ${OPENEXR_LIBRARIES}")
+message(STATUS "OPENEXR_INCLUDE_DIRS : ${OPENEXR_INCLUDE_DIRS}")
+
+add_executable(openexr_test openexr_test.cpp)
+target_link_libraries(openexr_test ${OPENEXR_LIBRARIES})
 
 #add_executable(prova_blas call_blas.c)
 #target_include_directories(prova_blas PRIVATE ${BLAS_INCLUDE_DIRS})
