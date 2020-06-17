@@ -12,6 +12,7 @@ project(prova C CXX)
 #find_package(FFMPEG)
 #find_package(OpenMP REQUIRED)
 #find_package(OpenEXR)
+
 find_package(CUDA)
 
 #set(protobuf_MODULE_COMPATIBLE ON CACHE BOOL "Enable compatible protobuf symbols")
