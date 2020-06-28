@@ -2,7 +2,7 @@
 
 number_of_build_workers=8
 bypass_vcpkg=false
-vcpkg_fork="_opencv43"
+vcpkg_fork=""
 #install_prefix="-DCMAKE_INSTALL_PREFIX=.."
 
 if [[ "$OSTYPE" == "darwin"* ]]; then

@@ -12,11 +12,11 @@ project(prova C CXX)
 #find_package(FFMPEG)
 #find_package(OpenMP REQUIRED)
 #find_package(OpenEXR)
-
-find_package(CUDA)
-
+#find_package(CUDA)
 #set(protobuf_MODULE_COMPATIBLE ON CACHE BOOL "Enable compatible protobuf symbols")
 #find_package(protobuf)
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
 
 #message(STATUS "ENV{CUDACXX}: $ENV{CUDACXX}")
 
@@ -69,5 +69,8 @@ find_package(CUDA)
 #add_executable(prova_openmp openmp_test.cpp)
 #target_link_libraries(prova_openmp PRIVATE OpenMP::OpenMP_CXX)
 
-add_executable(prova_cuda cuda_test.cpp)
-target_include_directories(prova_cuda PRIVATE ${CUDA_INCLUDE_DIRS})
+#add_executable(prova_cuda cuda_test.cpp)
+#target_include_directories(prova_cuda PRIVATE ${CUDA_INCLUDE_DIRS})
+
+add_executable(prova_ssl ssl_test.cpp)
+target_link_libraries(prova_ssl PRIVATE OpenSSL::SSL OpenSSL::Crypto)

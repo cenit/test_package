@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 
 $number_of_build_workers=8
-$vcpkg_fork="_opencv43"
+$vcpkg_fork=""
 #$install_prefix="-DCMAKE_INSTALL_PREFIX=.."
 
 function getProgramFiles32bit() {
