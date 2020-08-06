@@ -5,6 +5,8 @@
 *.exe
 *.dll
 build_*/
+Modules/
+cmake/
 
 # OS Generated #
 .DS_Store*
@@ -16,4 +18,3 @@ Thumbs.db
 # IDE generated #
 .vs/
 .vscode/
-

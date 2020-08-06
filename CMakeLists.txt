@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(prova C CXX)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
 
 #find_package(CUDNN)
 #find_package(BLAS)
@@ -15,8 +16,10 @@ project(prova C CXX)
 #find_package(CUDA)
 #set(protobuf_MODULE_COMPATIBLE ON CACHE BOOL "Enable compatible protobuf symbols")
 #find_package(protobuf)
-set(OPENSSL_USE_STATIC_LIBS TRUE)
-find_package(OpenSSL REQUIRED)
+#set(OPENSSL_USE_STATIC_LIBS TRUE)
+#find_package(OpenSSL REQUIRED)
+#find_package(poly2tri REQUIRED)
+find_package(CXSDK)
 
 #message(STATUS "ENV{CUDACXX}: $ENV{CUDACXX}")
 
@@ -72,5 +75,11 @@ find_package(OpenSSL REQUIRED)
 #add_executable(prova_cuda cuda_test.cpp)
 #target_include_directories(prova_cuda PRIVATE ${CUDA_INCLUDE_DIRS})
 
-add_executable(prova_ssl ssl_test.cpp)
-target_link_libraries(prova_ssl PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+#add_executable(prova_ssl ssl_test.cpp)
+#target_link_libraries(prova_ssl PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+
+#add_executable(prova_polytri polytri.test.cpp)
+#target_link_libraries(prova_polytri PRIVATE poly2tri::poly2tri)
+
+add_executable(prova_cxsdk cxsdk_test.cpp)
+target_link_libraries(prova_cxsdk PRIVATE AT::CxBaseLib)
