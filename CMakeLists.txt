@@ -20,7 +20,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
 #find_package(OpenSSL REQUIRED)
 #find_package(poly2tri REQUIRED)
 #find_package(CXSDK)
-find_package(VTK 9 NAMES vtk COMPONENTS FiltersExtraction FiltersSources FiltersTexture IOExport IOGeometry IOPLY InteractionStyle RenderingCore RenderingLOD RenderingOpenGL2 NO_MODULE REQUIRED)
+#find_package(VTK 9 NAMES vtk COMPONENTS FiltersExtraction FiltersSources FiltersTexture IOExport IOGeometry IOPLY InteractionStyle RenderingCore RenderingLOD RenderingOpenGL2 NO_MODULE REQUIRED)
+find_package(GOSDK REQUIRED)
 
 #message(STATUS "ENV{CUDACXX}: $ENV{CUDACXX}")
 
@@ -85,6 +86,9 @@ find_package(VTK 9 NAMES vtk COMPONENTS FiltersExtraction FiltersSources Filters
 #add_executable(prova_cxsdk cxsdk_test.cpp)
 #target_link_libraries(prova_cxsdk PRIVATE AT::CxBaseLib)
 
-add_executable(vtk_test vtk_test.cpp)
-target_include_directories(vtk_test PRIVATE ${VTK_INCLUDE_DIRS})
-target_link_libraries(vtk_test PRIVATE ${VTK_LIBRARIES})
+#add_executable(vtk_test vtk_test.cpp)
+#target_include_directories(vtk_test PRIVATE ${VTK_INCLUDE_DIRS})
+#target_link_libraries(vtk_test PRIVATE ${VTK_LIBRARIES})
+
+add_executable(prova_gocator gocator_test.cpp)
+target_link_libraries(prova_gocator PRIVATE GO::SDK GO::KAPI)
