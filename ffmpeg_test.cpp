@@ -2,19 +2,20 @@
 
 #include <stdlib.h>
 
-extern "C" {
+extern "C"
+{
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 }
 
-#define CALC_FFMPEG_VERSION(a,b,c) ( a<<16 | b<<8 | c )
+#define CALC_FFMPEG_VERSION(a, b, c) (a << 16 | b << 8 | c)
 
 static void test()
 {
-  AVFormatContext* c = 0;
-  AVCodec* avcodec = 0;
-  AVFrame* frame = 0;
+  AVFormatContext *c = 0;
+  AVCodec *avcodec = 0;
+  AVFrame *frame = 0;
   (void)avcodec;
   (void)frame;
 
@@ -26,4 +27,8 @@ static void test()
   (void)err;
 }
 
-int main() { test(); return 0; }
+int main()
+{
+  test();
+  return 0;
+}

@@ -10,7 +10,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
 #find_package(LibLZMA REQUIRED NO_MODULE)
 #find_package(TIFF)
 #find_package(LAPACK CONFIG REQUIRED)
-#find_package(FFMPEG)
+find_package(FFMPEG)
 #find_package(OpenMP REQUIRED)
 #find_package(OpenEXR)
 #find_package(CUDA)
@@ -21,7 +21,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
 #find_package(poly2tri REQUIRED)
 #find_package(CXSDK)
 #find_package(VTK 9 NAMES vtk COMPONENTS FiltersExtraction FiltersSources FiltersTexture IOExport IOGeometry IOPLY InteractionStyle RenderingCore RenderingLOD RenderingOpenGL2 NO_MODULE REQUIRED)
-find_package(GOSDK REQUIRED)
+#find_package(GOSDK REQUIRED)
 
 #message(STATUS "ENV{CUDACXX}: $ENV{CUDACXX}")
 
@@ -38,16 +38,16 @@ find_package(GOSDK REQUIRED)
 #message(STATUS "PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}")
 #message(STATUS "protobuf_LIBRARIES: ${protobuf_LIBRARIES}")
 
-#message(STATUS "FFMPEG_INCLUDE_DIRS : ${FFMPEG_INCLUDE_DIRS}")
-#message(STATUS "FFMPEG_libavformat_LIBRARY : FOUND: ${FFMPEG_libavformat_FOUND} - ${FFMPEG_libavformat_LIBRARY}")
-#message(STATUS "FFMPEG_libavdevice_LIBRARY : FOUND: ${FFMPEG_libavdevice_FOUND} - ${FFMPEG_libavdevice_LIBRARY}")
-#message(STATUS "FFMPEG_libavcodec_LIBRARY : FOUND: ${FFMPEG_libavcodec_FOUND} - ${FFMPEG_libavcodec_LIBRARY}")
-#message(STATUS "FFMPEG_libswresample_LIBRARY : FOUND: ${FFMPEG_libswresample_FOUND} - ${FFMPEG_libswresample_LIBRARY}")
-#message(STATUS "FFMPEG_libavresample_LIBRARY : FOUND: ${FFMPEG_libavresample_FOUND} - ${FFMPEG_libavresample_LIBRARY}")
-#message(STATUS "FFMPEG_libavutil_LIBRARY : FOUND: ${FFMPEG_libavutil_FOUND} - ${FFMPEG_libavutil_LIBRARY}")
-#message(STATUS "FFMPEG_libswscale_LIBRARY : FOUND: ${FFMPEG_libswscale_FOUND} - ${FFMPEG_libswscale_LIBRARY}")
-#message(STATUS "FFMPEG_PLATFORM_DEPENDENT_LIBS : ${FFMPEG_PLATFORM_DEPENDENT_LIBS}")
-#message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
+message(STATUS "FFMPEG_INCLUDE_DIRS : ${FFMPEG_INCLUDE_DIRS}")
+message(STATUS "FFMPEG_libavformat_LIBRARY : FOUND: ${FFMPEG_libavformat_FOUND} - ${FFMPEG_libavformat_LIBRARY}")
+message(STATUS "FFMPEG_libavdevice_LIBRARY : FOUND: ${FFMPEG_libavdevice_FOUND} - ${FFMPEG_libavdevice_LIBRARY}")
+message(STATUS "FFMPEG_libavcodec_LIBRARY : FOUND: ${FFMPEG_libavcodec_FOUND} - ${FFMPEG_libavcodec_LIBRARY}")
+message(STATUS "FFMPEG_libswresample_LIBRARY : FOUND: ${FFMPEG_libswresample_FOUND} - ${FFMPEG_libswresample_LIBRARY}")
+message(STATUS "FFMPEG_libavresample_LIBRARY : FOUND: ${FFMPEG_libavresample_FOUND} - ${FFMPEG_libavresample_LIBRARY}")
+message(STATUS "FFMPEG_libavutil_LIBRARY : FOUND: ${FFMPEG_libavutil_FOUND} - ${FFMPEG_libavutil_LIBRARY}")
+message(STATUS "FFMPEG_libswscale_LIBRARY : FOUND: ${FFMPEG_libswscale_FOUND} - ${FFMPEG_libswscale_LIBRARY}")
+message(STATUS "FFMPEG_PLATFORM_DEPENDENT_LIBS : ${FFMPEG_PLATFORM_DEPENDENT_LIBS}")
+message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
 
 #message(STATUS "OPENEXR_VERSION : ${OPENEXR_VERSION}")
 #message(STATUS "OPENEXR_LIBRARIES : ${OPENEXR_LIBRARIES}")
@@ -67,6 +67,18 @@ find_package(GOSDK REQUIRED)
 #add_executable(prova_ffmpeg ffmpeg_test.cpp)
 #target_include_directories(prova_ffmpeg PRIVATE ${FFMPEG_INCLUDE_DIRS})
 #target_link_libraries(prova_ffmpeg PRIVATE ${FFMPEG_LIBRARIES})
+
+try_compile(__VALID_FFMPEG
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg_test.cpp"
+  CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${FFMPEG_INCLUDE_DIRS}"
+              "-DLINK_LIBRARIES:STRING=${FFMPEG_LIBRARIES}"
+  OUTPUT_VARIABLE TRY_OUT
+)
+if(NOT __VALID_FFMPEG)
+  message(STATUS "WARNING: Can't build ffmpeg test code")
+endif()
+
 
 #add_executable(test_ocv opencv_test.cpp)
 #target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
@@ -90,5 +102,5 @@ find_package(GOSDK REQUIRED)
 #target_include_directories(vtk_test PRIVATE ${VTK_INCLUDE_DIRS})
 #target_link_libraries(vtk_test PRIVATE ${VTK_LIBRARIES})
 
-add_executable(prova_gocator gocator_test.cpp)
-target_link_libraries(prova_gocator PRIVATE GO::SDK GO::KAPI)
+#add_executable(prova_gocator gocator_test.cpp)
+#target_link_libraries(prova_gocator PRIVATE GO::SDK GO::KAPI)

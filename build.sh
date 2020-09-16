@@ -2,13 +2,13 @@
 
 number_of_build_workers=8
 bypass_vcpkg=false
-vcpkg_fork=""
+vcpkg_fork="_vtk9"
 #install_prefix="-DCMAKE_INSTALL_PREFIX=.."
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if [[ "$1" == "gcc" ]]; then
-    export CC="/usr/local/bin/gcc-9"
-    export CXX="/usr/local/bin/g++-9"
+    export CC="/usr/local/bin/gcc-10"
+    export CXX="/usr/local/bin/g++-10"
   fi
   vcpkg_triplet="x64-osx"
 else
