@@ -6,11 +6,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
 #find_package(CUDNN)
 #find_package(BLAS)
 #find_package(OpenBLAS)
-#find_package(LAPACK)
+find_package(LAPACK)
 #find_package(LibLZMA REQUIRED NO_MODULE)
 #find_package(TIFF)
 #find_package(LAPACK CONFIG REQUIRED)
-find_package(FFMPEG)
+#find_package(FFMPEG)
 #find_package(OpenMP REQUIRED)
 #find_package(OpenEXR)
 #find_package(CUDA)
@@ -25,10 +25,15 @@ find_package(FFMPEG)
 
 #message(STATUS "ENV{CUDACXX}: $ENV{CUDACXX}")
 
+#find_path(BLAS_INCLUDE_DIR cblas.h)
+#message(STATUS "BLAS_INCLUDE_DIR: ${BLAS_INCLUDE_DIR}")
+#message(STATUS "BLAS_LIBRARIES: ${BLAS_LIBRARIES}")
+
 #message(STATUS "CLAPACK_FOUND: ${CLAPACK_FOUND}")
 #message(STATUS "CLAPACK_VERSION: ${CLAPACK_VERSION}")
 #message(STATUS "CLAPACK_LIBRARY: ${CLAPACK_LIBRARY}")
 #message(STATUS "LAPACK_LIBRARY: ${LAPACK_LIBRARY}")
+message(STATUS "LAPACK_LIBRARIES: ${LAPACK_LIBRARIES}")
 #message(STATUS "CLAPACK_INCLUDE_DIR: ${CLAPACK_INCLUDE_DIR}")
 
 #message(STATUS "LibLZMA_FOUND: ${LibLZMA_FOUND}")
@@ -38,16 +43,16 @@ find_package(FFMPEG)
 #message(STATUS "PROTOBUF_LIBRARIES: ${PROTOBUF_LIBRARIES}")
 #message(STATUS "protobuf_LIBRARIES: ${protobuf_LIBRARIES}")
 
-message(STATUS "FFMPEG_INCLUDE_DIRS : ${FFMPEG_INCLUDE_DIRS}")
-message(STATUS "FFMPEG_libavformat_LIBRARY : FOUND: ${FFMPEG_libavformat_FOUND} - ${FFMPEG_libavformat_LIBRARY}")
-message(STATUS "FFMPEG_libavdevice_LIBRARY : FOUND: ${FFMPEG_libavdevice_FOUND} - ${FFMPEG_libavdevice_LIBRARY}")
-message(STATUS "FFMPEG_libavcodec_LIBRARY : FOUND: ${FFMPEG_libavcodec_FOUND} - ${FFMPEG_libavcodec_LIBRARY}")
-message(STATUS "FFMPEG_libswresample_LIBRARY : FOUND: ${FFMPEG_libswresample_FOUND} - ${FFMPEG_libswresample_LIBRARY}")
-message(STATUS "FFMPEG_libavresample_LIBRARY : FOUND: ${FFMPEG_libavresample_FOUND} - ${FFMPEG_libavresample_LIBRARY}")
-message(STATUS "FFMPEG_libavutil_LIBRARY : FOUND: ${FFMPEG_libavutil_FOUND} - ${FFMPEG_libavutil_LIBRARY}")
-message(STATUS "FFMPEG_libswscale_LIBRARY : FOUND: ${FFMPEG_libswscale_FOUND} - ${FFMPEG_libswscale_LIBRARY}")
-message(STATUS "FFMPEG_PLATFORM_DEPENDENT_LIBS : ${FFMPEG_PLATFORM_DEPENDENT_LIBS}")
-message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
+#message(STATUS "FFMPEG_INCLUDE_DIRS : ${FFMPEG_INCLUDE_DIRS}")
+#message(STATUS "FFMPEG_libavformat_LIBRARY : FOUND: ${FFMPEG_libavformat_FOUND} - ${FFMPEG_libavformat_LIBRARY}")
+#message(STATUS "FFMPEG_libavdevice_LIBRARY : FOUND: ${FFMPEG_libavdevice_FOUND} - ${FFMPEG_libavdevice_LIBRARY}")
+#message(STATUS "FFMPEG_libavcodec_LIBRARY : FOUND: ${FFMPEG_libavcodec_FOUND} - ${FFMPEG_libavcodec_LIBRARY}")
+#message(STATUS "FFMPEG_libswresample_LIBRARY : FOUND: ${FFMPEG_libswresample_FOUND} - ${FFMPEG_libswresample_LIBRARY}")
+#message(STATUS "FFMPEG_libavresample_LIBRARY : FOUND: ${FFMPEG_libavresample_FOUND} - ${FFMPEG_libavresample_LIBRARY}")
+#message(STATUS "FFMPEG_libavutil_LIBRARY : FOUND: ${FFMPEG_libavutil_FOUND} - ${FFMPEG_libavutil_LIBRARY}")
+#message(STATUS "FFMPEG_libswscale_LIBRARY : FOUND: ${FFMPEG_libswscale_FOUND} - ${FFMPEG_libswscale_LIBRARY}")
+#message(STATUS "FFMPEG_PLATFORM_DEPENDENT_LIBS : ${FFMPEG_PLATFORM_DEPENDENT_LIBS}")
+#message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
 
 #message(STATUS "OPENEXR_VERSION : ${OPENEXR_VERSION}")
 #message(STATUS "OPENEXR_LIBRARIES : ${OPENEXR_LIBRARIES}")
@@ -56,29 +61,30 @@ message(STATUS "FFMPEG_LIBRARIES : ${FFMPEG_LIBRARIES}")
 #target_link_libraries(openexr_test ${OPENEXR_LIBRARIES})
 
 #add_executable(prova_blas call_blas.c)
-#target_include_directories(prova_blas PRIVATE ${BLAS_INCLUDE_DIRS})
-#target_link_libraries(prova_blas ${BLAS_LIBRARIES})
-#target_link_libraries(prova_blas OpenBLAS::OpenBLAS)
+#target_include_directories(prova_blas PRIVATE ${BLAS_INCLUDE_DIR})
+#target_link_libraries(prova_blas BLAS::BLAS)
 
-#add_executable(prova_lapack call_lapack.cpp)
-#target_link_libraries(prova_lapack ${LAPACK_LIBRARIES})
+#add_executable(prova_openblas call_blas.c)
+#target_link_libraries(prova_openblas OpenBLAS::OpenBLAS)
+
+add_executable(prova_lapack call_lapack.cpp)
+target_link_libraries(prova_lapack ${LAPACK_LIBRARIES})
 #target_link_libraries(prova_lapack clapack::clapack)
 
 #add_executable(prova_ffmpeg ffmpeg_test.cpp)
 #target_include_directories(prova_ffmpeg PRIVATE ${FFMPEG_INCLUDE_DIRS})
 #target_link_libraries(prova_ffmpeg PRIVATE ${FFMPEG_LIBRARIES})
 
-try_compile(__VALID_FFMPEG
-  "${CMAKE_CURRENT_BINARY_DIR}"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg_test.cpp"
-  CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${FFMPEG_INCLUDE_DIRS}"
-              "-DLINK_LIBRARIES:STRING=${FFMPEG_LIBRARIES}"
-  OUTPUT_VARIABLE TRY_OUT
-)
-if(NOT __VALID_FFMPEG)
-  message(STATUS "WARNING: Can't build ffmpeg test code")
-endif()
-
+#try_compile(__VALID_FFMPEG
+#  "${CMAKE_CURRENT_BINARY_DIR}"
+#  "${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg_test.cpp"
+#  CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${FFMPEG_INCLUDE_DIRS}"
+#              "-DLINK_LIBRARIES:STRING=${FFMPEG_LIBRARIES}"
+#  OUTPUT_VARIABLE TRY_OUT
+#)
+#if(NOT __VALID_FFMPEG)
+#  message(STATUS "WARNING: Can't build ffmpeg test code")
+#endif()
 
 #add_executable(test_ocv opencv_test.cpp)
 #target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
