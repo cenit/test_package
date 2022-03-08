@@ -1,7 +1,76 @@
 #!/usr/bin/env pwsh
 
+<#
+
+.SYNOPSIS
+        build
+        Created By: Stefano Sinigardi
+        Created Date: February 18, 2019
+        Last Modified Date: November 10, 2021
+
+.DESCRIPTION
+Build darknet using CMake, trying to properly setup the environment around compiler
+
+.PARAMETER DisableInteractive
+Disable script interactivity (useful for CI runs)
+
+.PARAMETER DisableDLLcopy
+Disable automatic DLL deployment through vcpkg at the end
+
+.PARAMETER EnableOpenMP
+Build tool with OpenMP support
+.PARAMETER UseVCPKG
+Use VCPKG to build tool dependencies. Clone it if not already found on system
+
+.PARAMETER DoNotUpdateVCPKG
+Do not update vcpkg before running the build (valid only if vcpkg is cloned by this script or the version found on the system is git-enabled)
+
+.PARAMETER DoNotUpdateTOOL
+Do not update the tool before running the build (valid only if tool is git-enabled)
+
+.PARAMETER DoNotDeleteBuildFolder
+Do not delete temporary cmake build folder at the end of the script
+
+.PARAMETER DoNotSetupVS
+Do not setup VisualStudio environment using the vcvars script
+
+.PARAMETER DoNotUseNinja
+Do not use Ninja for build
+
+.PARAMETER ForceStaticLib
+Create library as static instead of the default linking mode of your system
+
+.PARAMETER ForceVCPKGCacheRemoval
+Force clean up of the local vcpkg binary cache before building
+
+.PARAMETER ForceVCPKGBuildtreesRemoval
+Force clean up of vcpkg buildtrees temp folder at the end of the script
+
+.PARAMETER ForceVCPKGPackagesRemoval
+Force clean up of vcpkg packages folder at the end of the script
+
+.PARAMETER ForceSetupVS
+Forces Visual Studio setup, also on systems on which it would not have been enabled automatically
+
+.PARAMETER ForceGCCVersion
+Force a specific GCC version
+
+.PARAMETER NumberOfBuildWorkers
+Forces a specific number of threads for parallel building
+
+.PARAMETER AdditionalBuildSetup
+Additional setup parameters to manually pass to CMake
+
+.EXAMPLE
+.\build -DisableInteractive -DoNotDeleteBuildFolder -UseVCPKG
+
+#>
+
 param (
   [switch]$DisableInteractive = $false,
+  [switch]$DisableDLLcopy = $false,
+  [switch]$EnableCUDA = $false,
+  [switch]$EnableOpenMP = $false,
   [switch]$UseVCPKG = $false,
   [switch]$DoNotUpdateVCPKG = $false,
   [switch]$DoNotUpdateTOOL = $false,
@@ -14,11 +83,12 @@ param (
   [switch]$ForceVCPKGPackagesRemoval = $false,
   [switch]$ForceSetupVS = $false,
   [Int32]$ForceGCCVersion = 0,
-  [string]$AdditionalBuildSetup = "",  # "-DCMAKE_CUDA_ARCHITECTURES=30"
-  [string]$VCPKGFork = ""
+  [Int32]$NumberOfBuildWorkers = 8,
+  [string]$VCPKGFork = "",
+  [string]$AdditionalBuildSetup = ""  # "-DCMAKE_CUDA_ARCHITECTURES=30"
 )
 
-$build_ps1_version = "1.9.8"
+$build_ps1_version = "1.9.9"
 
 $ErrorActionPreference = "SilentlyContinue"
 Stop-Transcript | out-null
@@ -124,9 +194,11 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
 
 if ($IsLinux -or $IsMacOS) {
   $bootstrap_ext = ".sh"
+  $exe_ext = ""
 }
 elseif ($IsWindows -or $IsWindowsPowerShell) {
   $bootstrap_ext = ".bat"
+  $exe_ext = ".exe"
 }
 if ($UseVCPKG) {
   Write-Host "vcpkg bootstrap script: bootstrap-vcpkg${bootstrap_ext}"
@@ -148,7 +220,13 @@ if (($IsLinux -or $IsMacOS) -and ($ForceGCCVersion -gt 0)) {
 }
 
 if (($IsWindows -or $IsWindowsPowerShell) -and (-Not $env:VCPKG_DEFAULT_TRIPLET)) {
-  $env:VCPKG_DEFAULT_TRIPLET = "x64-windows"
+  $env:VCPKG_DEFAULT_TRIPLET = "x64-windows-release"
+}
+elseif ($IsMacOS -and (-Not $env:VCPKG_DEFAULT_TRIPLET)) {
+  $env:VCPKG_DEFAULT_TRIPLET = "x64-osx-release"
+}
+elseif ($IsLinux -and (-Not $env:VCPKG_DEFAULT_TRIPLET)) {
+  $env:VCPKG_DEFAULT_TRIPLET = "x64-linux-release"
 }
 
 if ($UseVCPKG) {
@@ -224,7 +302,7 @@ if (-Not $DoNotUseNinja) {
   $NINJA_EXE = Get-Command "ninja" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition
   if (-Not $NINJA_EXE) {
     DownloadNinja
-    $env:PATH += ";${PSScriptRoot}/ninja"
+    $env:PATH = '{0}{1}{2}' -f $env:PATH, [IO.Path]::PathSeparator, "${PSScriptRoot}/ninja"
     $NINJA_EXE = Get-Command "ninja" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition
     if (-Not $NINJA_EXE) {
       $DoNotUseNinja = $true
@@ -335,15 +413,51 @@ function getLatestVisualStudioWithDesktopWorkloadVersion() {
 
 $vcpkg_root_set_by_this_script = $false
 
-if ((Test-Path "${env:WORKSPACE}/vcpkg${VCPKGFork}") -and $UseVCPKG) {
+if ((Test-Path env:VCPKG_ROOT) -and $UseVCPKG -and $VCPKGFork -eq "") {
+  $vcpkg_path = "$env:VCPKG_ROOT"
+  Write-Host "Found vcpkg in VCPKG_ROOT: $vcpkg_path"
+  $AdditionalBuildSetup = $AdditionalBuildSetup + " -DENABLE_VCPKG_INTEGRATION:BOOL=ON"
+}
+elseif ((Test-Path "${env:WORKSPACE}/vcpkg${VCPKGFork}") -and $UseVCPKG) {
   $vcpkg_path = "${env:WORKSPACE}/vcpkg${VCPKGFork}"
   $env:VCPKG_ROOT = "${env:WORKSPACE}/vcpkg${VCPKGFork}"
   $vcpkg_root_set_by_this_script = $true
   Write-Host "Found vcpkg in WORKSPACE/vcpkg${VCPKGFork}: $vcpkg_path"
   $AdditionalBuildSetup = $AdditionalBuildSetup + " -DENABLE_VCPKG_INTEGRATION:BOOL=ON"
 }
+elseif (-not($null -eq ${RUNVCPKG_VCPKG_ROOT_OUT})) {
+  if ((Test-Path "${RUNVCPKG_VCPKG_ROOT_OUT}") -and $UseVCPKG) {
+    $vcpkg_path = "${RUNVCPKG_VCPKG_ROOT_OUT}"
+    $env:VCPKG_ROOT = "${RUNVCPKG_VCPKG_ROOT_OUT}"
+    $vcpkg_root_set_by_this_script = $true
+    Write-Host "Found vcpkg in RUNVCPKG_VCPKG_ROOT_OUT: ${vcpkg_path}"
+    $AdditionalBuildSetup = $AdditionalBuildSetup + " -DENABLE_VCPKG_INTEGRATION:BOOL=ON"
+  }
+}
+elseif ($UseVCPKG) {
+  if (-Not (Test-Path "$PWD/vcpkg")) {
+    $proc = Start-Process -NoNewWindow -PassThru -FilePath $GIT_EXE -ArgumentList "clone https://github.com/microsoft/vcpkg"
+    $handle = $proc.Handle
+    $proc.WaitForExit()
+    $exitCode = $proc.ExitCode
+    if (-not ($exitCode -eq 0)) {
+      MyThrow("Cloning vcpkg sources failed! Exited with error code $exitCode.")
+    }
+  }
+  $vcpkg_path = "$PWD/vcpkg"
+  $env:VCPKG_ROOT = "$PWD/vcpkg"
+  $vcpkg_root_set_by_this_script = $true
+  Write-Host "Found vcpkg in $PWD/vcpkg: $PWD/vcpkg"
+  $AdditionalBuildSetup = $AdditionalBuildSetup + " -DENABLE_VCPKG_INTEGRATION:BOOL=ON"
+}
 else {
-  MyThrow("Unable to find vcpkg${VCPKGFork}")
+  if (-not ($VCPKGFork -eq "")) {
+    MyThrow("Unable to find vcpkg${VCPKGFork}")
+  }
+  else {
+    Write-Host "Skipping vcpkg integration`n" -ForegroundColor Yellow
+    $AdditionalBuildSetup = $AdditionalBuildSetup + " -DENABLE_VCPKG_INTEGRATION:BOOL=OFF"
+  }
 }
 
 if ($UseVCPKG -and (Test-Path "$vcpkg_path/.git") -and (-Not $DoNotUpdateVCPKG)) {
@@ -381,6 +495,12 @@ if ($ForceVCPKGCacheRemoval -and (-Not $UseVCPKG)) {
   Write-Host "VCPKG is not enabled, so local vcpkg binary cache will not be deleted even if requested" -ForegroundColor Yellow
 }
 
+if ($UseVCPKG -and $ForceVCPKGBuildtreesRemoval) {
+  Write-Host "Cleaning folder buildtrees inside vcpkg" -ForegroundColor Yellow
+  Remove-Item -Force -Recurse -ErrorAction SilentlyContinue "$env:VCPKG_ROOT/buildtrees"
+}
+
+
 if ($UseVCPKG -and $ForceVCPKGCacheRemoval) {
   if ($IsWindows -or $IsWindowsPowerShell) {
     $vcpkgbinarycachepath = "$env:LOCALAPPDATA/vcpkg/archive"
@@ -417,7 +537,6 @@ if (-Not $DoNotSetupVS) {
   $tokens = getLatestVisualStudioWithDesktopWorkloadVersion
   $tokens = $tokens.split('.')
   if ($DoNotUseNinja) {
-    $dllfolder = "Release"
     $selectConfig = " --config Release "
     if ($tokens[0] -eq "14") {
       $generator = "Visual Studio 14 2015"
@@ -439,9 +558,6 @@ if (-Not $DoNotSetupVS) {
       MyThrow("Unknown Visual Studio version, unsupported configuration")
     }
   }
-  if (-Not $UseVCPKG) {
-    $dllfolder = ""
-  }
 }
 if ($DoNotSetupVS -and $DoNotUseNinja) {
   $generator = "Unix Makefiles"
@@ -453,7 +569,7 @@ if (-Not $IsMacOS -and $EnableCUDA) {
   $NVCC_EXE = Get-Command "nvcc" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Definition
   if (-Not $NVCC_EXE) {
     if (Test-Path env:CUDA_PATH) {
-      $env:PATH += ";${env:CUDA_PATH}/bin"
+      $env:PATH = '{0}{1}{2}' -f $env:PATH, [IO.Path]::PathSeparator, "${env:CUDA_PATH}/bin"
       Write-Host "Found cuda in ${env:CUDA_PATH}"
     }
     else {
@@ -478,6 +594,10 @@ if ($EnableOpenMP) {
   $AdditionalBuildSetup = $AdditionalBuildSetup + " -DENABLE_OPENMP=ON"
 }
 
+if (-Not $DisableDLLcopy) {
+  $AdditionalBuildSetup = $AdditionalBuildSetup + " -DX_VCPKG_APPLOCAL_DEPS_INSTALL=ON"
+}
+
 $build_folder = "./build_release"
 if (-Not $DoNotDeleteBuildFolder) {
   Write-Host "Removing folder $build_folder" -ForegroundColor Yellow
@@ -497,7 +617,7 @@ if (-Not ($exitCode -eq 0)) {
   MyThrow("Config failed! Exited with error code $exitCode.")
 }
 Write-Host "Building CMake project" -ForegroundColor Green
-$proc = Start-Process -NoNewWindow -PassThru -FilePath $CMAKE_EXE -ArgumentList "--build . ${selectConfig}"
+$proc = Start-Process -NoNewWindow -PassThru -FilePath $CMAKE_EXE -ArgumentList "--build . ${selectConfig} --parallel ${NumberOfBuildWorkers} --target install"
 $handle = $proc.Handle
 $proc.WaitForExit()
 $exitCode = $proc.ExitCode
