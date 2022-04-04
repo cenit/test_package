@@ -6,7 +6,6 @@
 *.dll
 build_*/
 Modules/
-cmake/
 build.log
 
 # OS Generated #

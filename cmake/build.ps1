@@ -6,7 +6,7 @@
         build
         Created By: Stefano Sinigardi
         Created Date: February 18, 2019
-        Last Modified Date: March 14, 2022
+        Last Modified Date: April 1, 2022
 
 .DESCRIPTION
 Build tool using CMake, trying to properly setup the environment around compiler
@@ -88,6 +88,30 @@ Additional setup parameters to manually pass to CMake
 
 #>
 
+<#
+Copyright (c) Stefano Sinigardi
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+#>
+
 param (
   [switch]$DisableInteractive = $false,
   [switch]$DisableDLLcopy = $false,
@@ -115,12 +139,12 @@ param (
   [string]$AdditionalBuildSetup = ""  # "-DCMAKE_CUDA_ARCHITECTURES=30"
 )
 
-$build_ps1_version = "2.0.2"
+$build_ps1_version = "2.1.0"
 
 $ErrorActionPreference = "SilentlyContinue"
 Stop-Transcript | out-null
 $ErrorActionPreference = "Continue"
-Start-Transcript -Path $PSScriptRoot/build.log
+Start-Transcript -Path $PSScriptRoot/../build.log
 
 Function MyThrow ($Message) {
   if ($DisableInteractive) {
@@ -275,6 +299,17 @@ if ($VCPKGBranch -ne "" -and -not $UseVCPKG) {
   $UseVCPKG = $true
 }
 
+if ($EnableCUDA) {
+  if ($IsMacOS) {
+    Write-Host "Cannot enable CUDA on macOS" -ForegroundColor Yellow
+    $EnableCUDA = $false
+  }
+  Write-Host "CUDA is enabled"
+}
+elseif (-Not $IsMacOS) {
+  Write-Host "CUDA is disabled, please pass -EnableCUDA to the script to enable"
+}
+
 if ($UseVCPKG) {
   Write-Host "VCPKG is enabled"
   if ($DoNotUpdateVCPKG) {
@@ -312,13 +347,14 @@ else {
   Write-Host "Using git from ${GIT_EXE}"
 }
 
-if (Test-Path "$PSScriptRoot/.git") {
-  Write-Host "This tool has been cloned with git and supports self-updating mechanism"
+if (Test-Path "$PSScriptRoot/../.git") {
+  Write-Host "This tool has been added as a submodule in a repo cloned with git and which supports self-updating mechanism"
   if ($DoNotUpdateTOOL) {
     Write-Host "This tool will not self-update sources" -ForegroundColor Yellow
   }
   else {
     Write-Host "This tool will self-update sources, please pass -DoNotUpdateTOOL to the script to disable"
+    Set-Location "$PSScriptRoot/.."
     $proc = Start-Process -NoNewWindow -PassThru -FilePath $GIT_EXE -ArgumentList "pull"
     $handle = $proc.Handle
     $proc.WaitForExit()
@@ -326,6 +362,16 @@ if (Test-Path "$PSScriptRoot/.git") {
     if (-Not ($exitCode -eq 0)) {
       MyThrow("Updating this tool sources failed! Exited with error code $exitCode.")
     }
+    if (Test-Path "$PSScriptRoot/../.gitmodules") {
+      $proc = Start-Process -NoNewWindow -PassThru -FilePath $GIT_EXE -ArgumentList "submodule update --init --recursive"
+      $handle = $proc.Handle
+      $proc.WaitForExit()
+      $exitCode = $proc.ExitCode
+      if (-Not ($exitCode -eq 0)) {
+        MyThrow("Updating this tool submodule sources failed! Exited with error code $exitCode.")
+      }
+    }
+    Set-Location "$PSScriptRoot"
   }
 }
 
@@ -701,11 +747,11 @@ if ($EnableCXSDKIntegration) {
 
 if ($EnableGOSDKIntegration) {
   if (-Not (Test-Path "${env:GO_SDK_4}")) {
-    if (-Not (Test-Path "$PSScriptRoot\..\GO_SDK\")) {
+    if (-Not (Test-Path "$PSScriptRoot\..\..\GO_SDK\")) {
       MyThrow("Gocator_examples requires GO_SDK_4!")
     }
     else {
-      $GOSDKPATH = "$PSScriptRoot\..\GO_SDK\bin"
+      $GOSDKPATH = "$PSScriptRoot\..\..\GO_SDK\bin"
     }
   }
   else {
@@ -713,7 +759,7 @@ if ($EnableGOSDKIntegration) {
   }
 }
 
-$build_folder = "./build_release"
+$build_folder = "$PSScriptRoot/../build_release"
 if (-Not $DoNotDeleteBuildFolder) {
   Write-Host "Removing folder $build_folder" -ForegroundColor Yellow
   Remove-Item -Force -Recurse -ErrorAction SilentlyContinue $build_folder
@@ -768,7 +814,7 @@ if ($EnableCXSDKIntegration -and -Not $DisableDLLcopy) {
   Copy-Item "..\data\xml\calib_bin_v2_compatibel.xml"                    ..\bin
 }
 
-Set-Location ..
+Pop-Location
 
 if (-Not $DoNotDeleteBuildFolder) {
   Write-Host "Removing folder $build_folder" -ForegroundColor Yellow
@@ -776,7 +822,6 @@ if (-Not $DoNotDeleteBuildFolder) {
 }
 
 Write-Host "Build complete!" -ForegroundColor Green
-Pop-Location
 
 if ($ForceVCPKGBuildtreesRemoval -and (-Not $UseVCPKG)) {
   Write-Host "VCPKG is not enabled, so local vcpkg buildtrees folder will not be deleted even if requested" -ForegroundColor Yellow
