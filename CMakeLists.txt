@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
+
+if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET})
+  message(STATUS "Setting default vcpkg target triplet to $ENV{VCPKG_DEFAULT_TRIPLET}")
+  set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_DEFAULT_TRIPLET})
+endif()
+
 if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
   message(STATUS "VCPKG found: $ENV{VCPKG_ROOT}")
@@ -16,9 +22,23 @@ else()
   message(WARNING "vcpkg not found, toolchain not defined, build might fail")
 endif()
 
+
 project(prova C CXX)
 
-#find_package(OpenCV)
+
+#set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv2")
+#set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv3")
+#set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv4")
+find_package(OpenCV REQUIRED)
+message(STATUS "OpenCV_FOUND: ${OpenCV_FOUND}")
+message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
+message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
+add_executable(test_ocv opencv_test.cpp)
+target_include_directories(test_ocv PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
+install(TARGETS test_ocv DESTINATION ${CMAKE_CURRENT_LIST_DIR})
+
 #find_package(CUDNN)
 #find_package(BLAS)
 #find_package(OpenBLAS)
@@ -45,9 +65,9 @@ project(prova C CXX)
 #message(STATUS "BLAS_INCLUDE_DIR: ${BLAS_INCLUDE_DIR}")
 #message(STATUS "BLAS_LIBRARIES: ${BLAS_LIBRARIES}")
 
-find_package(GIF)
-message(STATUS "GIF_INCLUDE_DIR: ${GIF_INCLUDE_DIR}")
-message(STATUS "GIF_LIBRARIES: ${GIF_LIBRARIES}")
+#find_package(GIF)
+#message(STATUS "GIF_INCLUDE_DIR: ${GIF_INCLUDE_DIR}")
+#message(STATUS "GIF_LIBRARIES: ${GIF_LIBRARIES}")
 
 #message(STATUS "CLAPACK_FOUND: ${CLAPACK_FOUND}")
 #message(STATUS "CLAPACK_VERSION: ${CLAPACK_VERSION}")
@@ -105,10 +125,6 @@ message(STATUS "GIF_LIBRARIES: ${GIF_LIBRARIES}")
 #if(NOT __VALID_FFMPEG)
 #  message(STATUS "WARNING: Can't build ffmpeg test code")
 #endif()
-
-#message(STATUS "OpenCV_FOUND: ${OpenCV_FOUND}")
-#add_executable(test_ocv opencv_test.cpp)
-#target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
 
 #add_executable(prova_openmp openmp_test.cpp)
 #target_link_libraries(prova_openmp PRIVATE OpenMP::OpenMP_CXX)
