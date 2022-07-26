@@ -25,6 +25,7 @@ endif()
 
 project(prova C CXX)
 
+#set(CMAKE_FIND_DEBUG_MODE ON)
 
 #set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv2")
 #set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv3")
@@ -147,3 +148,5 @@ install(TARGETS test_ocv DESTINATION ${CMAKE_CURRENT_LIST_DIR})
 
 #add_executable(prova_gocator gocator_test.cpp)
 #target_link_libraries(prova_gocator PRIVATE GO::SDK GO::KAPI)
+
+#set(CMAKE_FIND_DEBUG_MODE OFF)
