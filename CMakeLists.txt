@@ -24,8 +24,16 @@ endif()
 
 
 project(prova C CXX)
+set(CMAKE_FIND_DEBUG_MODE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
-#set(CMAKE_FIND_DEBUG_MODE ON)
+find_package(PkgConfig REQUIRED)
+message(STATUS "PKG_CONFIG_EXECUTABLE: ${PKG_CONFIG_EXECUTABLE}")
+message(STATUS "PKG_CONFIG_FOUND: ${PKG_CONFIG_FOUND}")
+message(STATUS "PKG_CONFIG_VERSION: ${PKG_CONFIG_VERSION_STRING}")
+
+pkg_check_modules(GTK3 gtk+-3.0)
+message(STATUS "GTK3_FOUND: ${GTK3_FOUND}")
 
 #set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv2")
 #set(OpenCV_DIR "F:/vcpkg_cenit/installed/x64-windows-release/share/opencv3")
@@ -40,10 +48,10 @@ project(prova C CXX)
 #target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
 #install(TARGETS test_ocv DESTINATION ${CMAKE_CURRENT_LIST_DIR})
 
-find_package(ZLIB)
-add_executable(test_zlib "zlib_test.cpp")
-target_link_libraries(test_zlib PRIVATE ZLIB::ZLIB)
-install(TARGETS test_zlib DESTINATION ${CMAKE_CURRENT_LIST_DIR})
+#find_package(ZLIB)
+#add_executable(test_zlib "zlib_test.cpp")
+#target_link_libraries(test_zlib PRIVATE ZLIB::ZLIB)
+#install(TARGETS test_zlib DESTINATION ${CMAKE_CURRENT_LIST_DIR})
 
 #find_package(CUDNN)
 #find_package(BLAS)
@@ -154,4 +162,4 @@ install(TARGETS test_zlib DESTINATION ${CMAKE_CURRENT_LIST_DIR})
 #add_executable(prova_gocator gocator_test.cpp)
 #target_link_libraries(prova_gocator PRIVATE GO::SDK GO::KAPI)
 
-#set(CMAKE_FIND_DEBUG_MODE OFF)
+set(CMAKE_FIND_DEBUG_MODE OFF)
