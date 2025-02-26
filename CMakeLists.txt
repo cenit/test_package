@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules/" ${CMAKE_MODULE_PATH})
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET})
   message(STATUS "Setting default vcpkg target triplet to $ENV{VCPKG_DEFAULT_TRIPLET}")
@@ -22,6 +23,27 @@ else()
   message(WARNING "vcpkg not found, toolchain not defined, build might fail")
 endif()
 
+message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "CMAKE_CHAINLOAD_TOOLCHAIN_FILE: ${CMAKE_CHAINLOAD_TOOLCHAIN_FILE}")
+
+message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
+message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
+message(STATUS "CMAKE_ASM_COMPILER: ${CMAKE_ASM_COMPILER}")
+message(STATUS "CMAKE_LINKER: ${CMAKE_LINKER}")
+message(STATUS "CMAKE_AR: ${CMAKE_AR}")
+message(STATUS "CMAKE_STRIP: ${CMAKE_STRIP}")
+message(STATUS "CMAKE_RANLIB: ${CMAKE_RANLIB}")
+message(STATUS "CMAKE_OBJCOPY: ${CMAKE_OBJCOPY}")
+message(STATUS "CMAKE_OBJDUMP: ${CMAKE_OBJDUMP}")
+message(STATUS "CMAKE_READELF: ${CMAKE_READELF}")
+message(STATUS "CMAKE_NM: ${CMAKE_NM}")
+message(STATUS "ARCH_FLAGS: ${ARCH_FLAGS}")
+message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+message(STATUS "CMAKE_ASM_FLAGS: ${CMAKE_ASM_FLAGS}")
+message(STATUS "CMAKE_LDFLAGS_FLAGS: ${CMAKE_LDFLAGS_FLAGS}")
+
 
 project(prova C CXX)
 
@@ -40,10 +62,17 @@ project(prova C CXX)
 #target_link_libraries(test_ocv PRIVATE ${OpenCV_LIBS})
 #install(TARGETS test_ocv DESTINATION ${CMAKE_CURRENT_LIST_DIR})
 
-find_package(ZLIB)
-add_executable(test_zlib "zlib_test.cpp")
-target_link_libraries(test_zlib PRIVATE ZLIB::ZLIB)
-install(TARGETS test_zlib DESTINATION ${CMAKE_CURRENT_LIST_DIR})
+#find_package(ZLIB)
+#add_executable(test_zlib "zlib_test.cpp")
+#target_link_libraries(test_zlib PRIVATE ZLIB::ZLIB)
+#install(TARGETS test_zlib DESTINATION ${CMAKE_CURRENT_LIST_DIR})
+
+find_package(llama REQUIRED_FILES)
+set(TARGET llama-perplexity)
+add_executable(${TARGET} perplexity.cpp)
+install(TARGETS ${TARGET} RUNTIME)
+target_link_libraries(${TARGET} PRIVATE common llama ${CMAKE_THREAD_LIBS_INIT})
+target_compile_features(${TARGET} PRIVATE cxx_std_17)
 
 #find_package(CUDNN)
 #find_package(BLAS)
